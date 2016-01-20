@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<job_conf>
+    <plugins>
+        <plugin id="local" type="runner" load="galaxy.jobs.runners.local:LocalJobRunner" workers="2"/>
+        <plugin id="sge" type="runner" load="galaxy.jobs.runners.drmaa:DRMAAJobRunner" workers="2"/>
+    </plugins>
+    <handlers default="handlers">
+        <handler id="handler0" tags="handlers"/>
+        <handler id="handler1" tags="handlers"/>
+    </handlers>
+    <destinations default="cluster">
+        <destination id="local" runner="local"/>
+        <destination id="cluster" runner="sge">
+            <env id="SGE_ROOT">/var/lib/gridengine</env>
+            <param id="nativeSpecification">-q all.q -l docker=1</param>
+        </destination>
+        <destination id="cluster_bigmem" runner="sge">
+            <env id="SGE_ROOT">/var/lib/gridengine</env>
+            <param id="nativeSpecification">-q all.q -l docker=1 -l h_vmem=8G</param>
+        </destination>
+        <destination id="trimmomatic_cluster" runner="sge">
+            <env id="SGE_ROOT">/var/lib/gridengine</env>
+            <!-- for a PE h_vmem gets multipled by the number of CPUs -->
+            <param id="nativeSpecification">-q all.q -l docker=1 -l h_vmem=2G -pe serial 6</param>
+        </destination>
+    </destinations>
+    <tools>
+        <tool id="upload1" handler="handlers" destination="local"/>
+        <tool id="trimmomatic" handler="handlers" destination="trimmomatic_cluster"/>
+    </tools>
+   
+</job_conf>
+
